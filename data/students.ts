@@ -4,7 +4,10 @@ import { z } from "zod";
 import { prisma } from "@/data/db";
 import type { ImportedStudentRow } from "@/data/import-students";
 import { requireRole, type CurrentUser } from "@/data/permissions";
-import { generateInitialPassword, hashPassword } from "@/lib/auth/passwords";
+import {
+  defaultStudentInitialPassword,
+  hashPassword,
+} from "@/lib/auth/passwords";
 
 function totalFromParts(
   exchanges: Array<{ totalPointsEarned: number }>,
@@ -528,7 +531,7 @@ export async function resetTeacherStudentPassword(
     throw new Error("ไม่พบนักเรียนที่ต้องการรีเซ็ตรหัสผ่าน");
   }
 
-  const initialPassword = generateInitialPassword();
+  const initialPassword = defaultStudentInitialPassword;
 
   await prisma.user.update({
     where: { id: profile.userId },
@@ -584,7 +587,7 @@ export async function importStudents(
   }> = [];
 
   for (const row of rows) {
-    const initialPassword = generateInitialPassword();
+    const initialPassword = defaultStudentInitialPassword;
     const user = await prisma.user.create({
       data: {
         role: UserRole.STUDENT,

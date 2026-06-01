@@ -108,8 +108,8 @@ The system teacher is still a teacher role with extra permissions.
 1. Teacher uploads a CSV or Excel file.
 2. System validates required columns: student ID, full name, grade level, classroom.
 3. System rejects duplicate student IDs in the file or existing database unless the teacher chooses an explicit update flow.
-4. System creates student accounts with initial passwords.
-5. Teacher downloads or views the generated initial passwords for distribution.
+4. System creates student accounts with the shared initial password `Password123!`.
+5. Teacher views the shared initial password for distribution.
 6. Students are prompted to change the initial password after first login.
 
 ### Waste Exchange
@@ -367,8 +367,8 @@ Student total points are calculated from confirmed exchanges plus point adjustme
 - Store only password hashes, never plain-text passwords.
 - Students log in with student ID and password.
 - Adult users log in with their assigned account name and password.
-- Initial passwords are generated during student import and require first-login change.
-- Initial passwords are shown or exported only at creation time and are not stored as plain text.
+- Imported students use the shared initial password `Password123!` and must change it on first login.
+- Password hashes are stored instead of plain-text passwords.
 - Server Actions must validate input and re-check role permissions.
 - The Data Access Layer must return minimal DTOs for client rendering.
 - Student pages must only return data for the current student.
