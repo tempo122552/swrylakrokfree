@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: swrylakrok
+    runtime: node
+    plan: starter
+    region: singapore
+    buildCommand: npm ci && npm run db:generate && npm run build
+    startCommand: npm run db:deploy && npm run db:bootstrap && npm run start:render
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/storage
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: file:/opt/render/project/src/storage/prod.db
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: NODE_VERSION
+        value: 24.16.0
+      - key: NODE_ENV
+        value: production

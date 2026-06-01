@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>คู่มือเตรียมเปิดใช้งานจริง | สว รย รักษ์โลกและสิ่งแวดล้อม</title>
+    <style>
+      :root {
+        --ink: #18312f;
+        --muted: #5f706e;
+        --paper: #fffdf7;
+        --mist: #eff7f2;
+        --leaf: #2f8b57;
+        --leaf-dark: #1f6840;
+        --sky: #2d7fa1;
+        --sun: #f2b84b;
+        --rose: #d85d52;
+        --line: #d9e4de;
+        --code: #16322f;
+        --shadow: 0 18px 44px rgba(24, 49, 47, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(135deg, rgba(47, 139, 87, 0.08), transparent 34%),
+          linear-gradient(315deg, rgba(45, 127, 161, 0.1), transparent 38%),
+          var(--paper);
+        color: var(--ink);
+        font-family:
+          "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+        line-height: 1.75;
+      }
+
+      a {
+        color: var(--leaf-dark);
+        font-weight: 700;
+      }
+
+      .page {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+        gap: 28px;
+        align-items: end;
+        padding: 48px 0 28px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 14px;
+        color: var(--leaf-dark);
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .eyebrow::before {
+        width: 34px;
+        height: 3px;
+        background: var(--sun);
+        border-radius: 999px;
+        content: "";
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        letter-spacing: 0;
+        line-height: 1.25;
+      }
+
+      h1 {
+        max-width: 780px;
+        font-size: clamp(2.1rem, 5vw, 4.6rem);
+      }
+
+      h2 {
+        font-size: clamp(1.45rem, 3vw, 2.2rem);
+      }
+
+      h3 {
+        font-size: 1.12rem;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .lead {
+        max-width: 720px;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 1.08rem;
+      }
+
+      .status-panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: var(--shadow);
+        padding: 22px;
+      }
+
+      .status-panel strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--leaf-dark);
+        font-size: 1.1rem;
+      }
+
+      .status-list {
+        display: grid;
+        gap: 10px;
+        margin: 18px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .status-list li {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .status-list li::before {
+        flex: 0 0 auto;
+        width: 10px;
+        height: 10px;
+        margin-top: 0.7em;
+        border-radius: 999px;
+        background: var(--leaf);
+        content: "";
+      }
+
+      .quick-nav {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        margin: 10px 0 28px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 253, 247, 0.96);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 8px 24px rgba(24, 49, 47, 0.08);
+        overflow-x: auto;
+      }
+
+      .quick-nav ul {
+        display: flex;
+        gap: 8px;
+        min-width: max-content;
+        margin: 0;
+        padding: 10px;
+        list-style: none;
+      }
+
+      .quick-nav a {
+        display: block;
+        border-radius: 8px;
+        padding: 9px 12px;
+        color: var(--ink);
+        text-decoration: none;
+      }
+
+      .quick-nav a:hover,
+      .quick-nav a:focus {
+        background: var(--mist);
+        outline: none;
+      }
+
+      .section {
+        margin: 28px 0;
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .section-head {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+
+      .number {
+        display: grid;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--ink);
+        color: white;
+        font-weight: 900;
+      }
+
+      .section-head p {
+        margin-top: 6px;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .note,
+      .warning,
+      .success {
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .note {
+        border: 1px solid rgba(45, 127, 161, 0.26);
+        background: rgba(45, 127, 161, 0.09);
+      }
+
+      .warning {
+        border: 1px solid rgba(216, 93, 82, 0.28);
+        background: rgba(216, 93, 82, 0.08);
+      }
+
+      .success {
+        border: 1px solid rgba(47, 139, 87, 0.24);
+        background: rgba(47, 139, 87, 0.08);
+      }
+
+      .label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 900;
+      }
+
+      code,
+      pre {
+        font-family: "Cascadia Mono", Consolas, monospace;
+      }
+
+      code {
+        border-radius: 6px;
+        background: rgba(24, 49, 47, 0.08);
+        padding: 0.12rem 0.34rem;
+        color: var(--code);
+        font-size: 0.95em;
+      }
+
+      pre {
+        margin: 12px 0 0;
+        overflow-x: auto;
+        border-radius: 8px;
+        background: #112927;
+        padding: 16px;
+        color: #f3fff8;
+        line-height: 1.6;
+      }
+
+      pre code {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+      }
+
+      .steps {
+        display: grid;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .steps li {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+        border-bottom: 1px solid var(--line);
+        padding: 0 0 12px;
+      }
+
+      .steps li:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      .step-dot {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--mist);
+        color: var(--leaf-dark);
+        font-weight: 900;
+      }
+
+      .checklist {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .checklist li {
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+      }
+
+      .box {
+        width: 20px;
+        height: 20px;
+        margin-top: 4px;
+        border: 2px solid var(--leaf);
+        border-radius: 4px;
+        background: white;
+      }
+
+      .account-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 8px;
+      }
+
+      .account-table th,
+      .account-table td {
+        border-bottom: 1px solid var(--line);
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .account-table th {
+        background: var(--mist);
+        color: var(--leaf-dark);
+      }
+
+      .account-table tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .footer {
+        margin: 34px 0 46px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          width: min(100% - 22px, 1120px);
+        }
+
+        .hero,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding-top: 28px;
+        }
+
+        .section {
+          padding: 18px;
+        }
+
+        .section-head {
+          gap: 12px;
+        }
+
+        .number {
+          flex-basis: 38px;
+          width: 38px;
+          height: 38px;
+        }
+
+        .account-table {
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+
+        .quick-nav {
+          display: none;
+        }
+
+        .section,
+        .status-panel {
+          break-inside: avoid;
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">คู่มือสำหรับเปิดใช้งานจริง version แรก</p>
+          <h1>สว รย รักษ์โลกและสิ่งแวดล้อม</h1>
+          <p class="lead">
+            หน้านี้สรุปขั้นตอนเตรียมระบบสะสมแต้มจากการแลกขยะให้อ่านง่ายขึ้น
+            เหมาะสำหรับครูหรือผู้ดูแลที่ต้องตรวจความพร้อมก่อนให้นักเรียนและเจ้าหน้าที่ใช้งานจริง
+          </p>
+        </div>
+
+        <aside class="status-panel" aria-label="สรุปสิ่งที่ต้องมี">
+          <strong>ก่อนเปิดระบบต้องมีอะไรบ้าง</strong>
+          <p>ใช้รายการนี้ตรวจแบบเร็ว ถ้าครบทุกข้อจึงค่อยเปิดให้ใช้งาน</p>
+          <ul class="status-list">
+            <li>ตั้งค่าไฟล์ <code>.env</code> แล้ว</li>
+            <li>สร้างฐานข้อมูลและบัญชีเริ่มต้นแล้ว</li>
+            <li>ตรวจ <code>/api/health</code> แล้วขึ้นปกติ</li>
+            <li>เปลี่ยนรหัสผ่านบัญชีเริ่มต้นแล้ว</li>
+            <li>วางแผนสำรองข้อมูลเรียบร้อยแล้ว</li>
+          </ul>
+        </aside>
+      </header>
+
+      <nav class="quick-nav" aria-label="หัวข้อในคู่มือ">
+        <ul>
+          <li><a href="#prepare">เตรียมข้อมูล</a></li>
+          <li><a href="#install">ติดตั้ง</a></li>
+          <li><a href="#start">เปิดระบบ</a></li>
+          <li><a href="#health">ตรวจสถานะ</a></li>
+          <li><a href="#accounts">บัญชีเริ่มต้น</a></li>
+          <li><a href="#smoke-test">ทดสอบก่อนใช้จริง</a></li>
+          <li><a href="#backup">สำรองข้อมูล</a></li>
+        </ul>
+      </nav>
+
+      <section id="prepare" class="section">
+        <div class="section-head">
+          <span class="number">1</span>
+          <div>
+            <h2>เตรียมข้อมูลสำคัญ</h2>
+            <p>ขั้นตอนนี้ทำครั้งแรกบนเครื่องหรือ server ที่จะใช้เปิดระบบจริง</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="note">
+            <span class="label">ไฟล์ตั้งค่าระบบ</span>
+            <p>
+              คัดลอกไฟล์ <code>.env.example</code> แล้วเปลี่ยนชื่อเป็น <code>.env</code>
+              จากนั้นตรวจว่ามีค่า <code>DATABASE_URL</code> และ <code>SESSION_SECRET</code>
+            </p>
+          </div>
+          <div class="warning">
+            <span class="label">รหัสลับของระบบ</span>
+            <p>
+              <code>SESSION_SECRET</code> ห้ามใช้ค่าตัวอย่าง ให้สร้างค่าใหม่ที่ยาวอย่างน้อย
+              32 ตัวอักษร และเก็บเป็นความลับ
+            </p>
+          </div>
+        </div>
+
+        <pre><code>DATABASE_URL="file:./prod.db"
+SESSION_SECRET="replace-with-a-real-secret-before-deploy"</code></pre>
+
+        <p style="margin-top: 14px">
+          ถ้าต้องสร้างรหัสลับใหม่ ให้ผู้ดูแลที่ถนัด command line รันคำสั่งนี้:
+        </p>
+        <pre><code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code></pre>
+      </section>
+
+      <section id="install" class="section">
+        <div class="section-head">
+          <span class="number">2</span>
+          <div>
+            <h2>ติดตั้งและสร้างฐานข้อมูล</h2>
+            <p>คำสั่งชุดนี้ทำให้ระบบพร้อมมีตารางฐานข้อมูลและข้อมูลเริ่มต้น</p>
+          </div>
+        </div>
+
+        <ol class="steps">
+          <li>
+            <span class="step-dot">1</span>
+            <div>
+              <h3>ติดตั้งไฟล์ที่ระบบต้องใช้</h3>
+              <pre><code>npm ci</code></pre>
+            </div>
+          </li>
+          <li>
+            <span class="step-dot">2</span>
+            <div>
+              <h3>เตรียม Prisma Client</h3>
+              <pre><code>npm run db:generate</code></pre>
+            </div>
+          </li>
+          <li>
+            <span class="step-dot">3</span>
+            <div>
+              <h3>สร้างหรือปรับฐานข้อมูลให้ตรงกับระบบ</h3>
+              <pre><code>npm run db:deploy</code></pre>
+            </div>
+          </li>
+          <li>
+            <span class="step-dot">4</span>
+            <div>
+              <h3>เพิ่มบัญชีเริ่มต้นและชนิดขยะพื้นฐาน</h3>
+              <pre><code>npm run db:seed</code></pre>
+            </div>
+          </li>
+        </ol>
+
+        <div class="note" style="margin-top: 18px">
+          <span class="label">ฐานข้อมูลอยู่ตรงไหน</span>
+          <p>
+            ถ้าใช้ค่า <code>DATABASE_URL="file:./prod.db"</code> ไฟล์ฐานข้อมูลจริงจะอยู่ที่
+            <code>prisma/prod.db</code> ควรเก็บไว้บนพื้นที่ที่ไม่หายเมื่อ restart server
+          </p>
+        </div>
+      </section>
+
+      <section id="start" class="section">
+        <div class="section-head">
+          <span class="number">3</span>
+          <div>
+            <h2>ตรวจ build และเปิดระบบ</h2>
+            <p>ใช้ชุดนี้ก่อนเปิดจริง เพื่อจับปัญหาให้เจอก่อนผู้ใช้งาน</p>
+          </div>
+        </div>
+
+        <pre><code>npm run verify
+npm run build
+npm run start</code></pre>
+
+        <div class="warning" style="margin-top: 18px">
+          <span class="label">ข้อควรระวัง</span>
+          <p>
+            เมื่อนำขึ้นใช้งานจริงควรเปิดผ่าน HTTPS และควรมี reverse proxy หรือ hosting
+            ที่ช่วยจัดการความปลอดภัย ไม่ควรเปิด server ออกอินเทอร์เน็ตโดยตรงแบบไม่มีชั้นป้องกัน
+          </p>
+        </div>
+      </section>
+
+      <section id="health" class="section">
+        <div class="section-head">
+          <span class="number">4</span>
+          <div>
+            <h2>ตรวจสถานะระบบ</h2>
+            <p>หลังเปิดระบบ ให้ตรวจว่าเว็บและฐานข้อมูลทำงานได้จริง</p>
+          </div>
+        </div>
+
+        <pre><code>http://localhost:3000/api/health</code></pre>
+
+        <div class="grid" style="margin-top: 18px">
+          <div class="success">
+            <span class="label">ถ้าปกติ</span>
+            <p>หน้า health จะตอบกลับประมาณว่า <code>ok: true</code> และ <code>database: ok</code></p>
+          </div>
+          <div class="warning">
+            <span class="label">ถ้าไม่ปกติ</span>
+            <p>
+              ถ้าได้ status <code>503</code> ให้ตรวจไฟล์ <code>.env</code>,
+              ตำแหน่งไฟล์ฐานข้อมูล และสิทธิ์การเขียนไฟล์ของ server
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="accounts" class="section">
+        <div class="section-head">
+          <span class="number">5</span>
+          <div>
+            <h2>บัญชีเริ่มต้น</h2>
+            <p>ใช้เพื่อเข้าไปเปิดระบบครั้งแรกเท่านั้น</p>
+          </div>
+        </div>
+
+        <table class="account-table">
+          <thead>
+            <tr>
+              <th>บทบาท</th>
+              <th>ชื่อผู้ใช้</th>
+              <th>รหัสผ่านเริ่มต้น</th>
+              <th>ต้องทำต่อ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ครูผู้ดูแลระบบ</td>
+              <td><code>teacher.admin</code></td>
+              <td><code>Password123!</code></td>
+              <td>เปลี่ยนรหัสผ่านทันทีหลัง login ครั้งแรก</td>
+            </tr>
+            <tr>
+              <td>เจ้าหน้าที่ทดลอง</td>
+              <td><code>staff.demo</code></td>
+              <td><code>Password123!</code></td>
+              <td>เปลี่ยนรหัสผ่านหรือปิดบัญชีเมื่อสร้างบัญชีจริงแล้ว</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="smoke-test" class="section">
+        <div class="section-head">
+          <span class="number">6</span>
+          <div>
+            <h2>เช็กลิสต์ก่อนเปิดให้นักเรียนใช้</h2>
+            <p>ติ๊กทีละข้อหลังทำสำเร็จ เพื่อยืนยันว่าระบบหลักพร้อมครบ</p>
+          </div>
+        </div>
+
+        <ul class="checklist">
+          <li><span class="box"></span><span>เปิด <code>/api/health</code> แล้วสถานะปกติ</span></li>
+          <li><span class="box"></span><span>ครู login เข้าระบบด้วยบัญชีจริงได้</span></li>
+          <li><span class="box"></span><span>เพิ่มหรือ import นักเรียนอย่างน้อย 1 ห้องเรียนได้</span></li>
+          <li><span class="box"></span><span>เจ้าหน้าที่ค้นหานักเรียนด้วยเลขประจำตัวนักเรียนได้</span></li>
+          <li><span class="box"></span><span>เจ้าหน้าที่บันทึกการแลกขยะได้อย่างน้อย 1 รายการ</span></li>
+          <li><span class="box"></span><span>สมาชิกเห็นแต้มสะสมและประวัติของตัวเองได้</span></li>
+          <li><span class="box"></span><span>ครูเห็น dashboard, กราฟ และอันดับแยกห้องเรียนได้</span></li>
+          <li><span class="box"></span><span>ดาวน์โหลด export และ backup จากหน้าครูได้</span></li>
+        </ul>
+      </section>
+
+      <section id="backup" class="section">
+        <div class="section-head">
+          <span class="number">7</span>
+          <div>
+            <h2>สำรองข้อมูลและความปลอดภัย</h2>
+            <p>ส่วนนี้สำคัญหลังเริ่มมีข้อมูลนักเรียนและประวัติการแลกขยะจริง</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="success">
+            <span class="label">ควรทำเป็นประจำ</span>
+            <p>
+              ดาวน์โหลด backup จากหน้าครู และเก็บสำเนาไว้นอก server หลัก เช่น
+              cloud drive ของโรงเรียนหรือเครื่องสำรอง
+            </p>
+          </div>
+          <div class="warning">
+            <span class="label">ห้ามเปิดเผย</span>
+            <p>
+              ไฟล์ <code>.env</code> และไฟล์ฐานข้อมูล <code>prod.db</code>
+              มีข้อมูลสำคัญ ห้ามส่งต่อหรือเก็บในที่สาธารณะ
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>เอกสารนี้ออกแบบให้เปิดอ่านใน browser ได้โดยตรง และสามารถพิมพ์เป็นกระดาษสำหรับตรวจวันเปิดใช้งานจริงได้</p>
+      </footer>
+    </main>
+  </body>
+</html>

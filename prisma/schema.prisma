@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  STAFF
+  TEACHER
+}
+
+model User {
+  id                      String            @id @default(cuid())
+  role                    UserRole
+  loginName               String            @unique
+  displayName             String
+  passwordHash            String
+  mustChangePassword      Boolean           @default(false)
+  isSystemTeacher         Boolean           @default(false)
+  isActive                Boolean           @default(true)
+  studentProfile          StudentProfile?
+  staffExchanges          Exchange[]        @relation("StaffExchanges")
+  pointAdjustmentsCreated PointAdjustment[] @relation("PointAdjustmentsCreated")
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+
+  @@index([role, isActive])
+}
+
+model StudentProfile {
+  id                   String                @id @default(cuid())
+  userId               String                @unique
+  user                 User                  @relation(fields: [userId], references: [id])
+  studentId            String                @unique
+  fullName             String
+  gradeLevel           String
+  classroom            String
+  exchanges            Exchange[]
+  remainders           StudentRemainder[]
+  pointAdjustments     PointAdjustment[]
+  remainderAdjustments RemainderAdjustment[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([classroom])
+  @@index([gradeLevel, classroom])
+}
+
+model WasteType {
+  id                   String                @id @default(cuid())
+  name                 String                @unique
+  itemsPerPoint        Int
+  isActive             Boolean               @default(true)
+  exchangeItems        ExchangeItem[]
+  remainders           StudentRemainder[]
+  remainderAdjustments RemainderAdjustment[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+}
+
+model Exchange {
+  id                String            @id @default(cuid())
+  studentProfileId  String
+  studentProfile    StudentProfile    @relation(fields: [studentProfileId], references: [id])
+  staffUserId       String
+  staffUser         User              @relation("StaffExchanges", fields: [staffUserId], references: [id])
+  totalPointsEarned Int
+  items             ExchangeItem[]
+  pointAdjustments  PointAdjustment[]
+  createdAt         DateTime          @default(now())
+
+  @@index([studentProfileId, createdAt])
+  @@index([staffUserId, createdAt])
+}
+
+model ExchangeItem {
+  id                String    @id @default(cuid())
+  exchangeId        String
+  exchange          Exchange  @relation(fields: [exchangeId], references: [id])
+  wasteTypeId       String
+  wasteType         WasteType @relation(fields: [wasteTypeId], references: [id])
+  itemCount         Int
+  previousRemainder Int
+  pointsEarned      Int
+  newRemainder      Int
+}
+
+model StudentRemainder {
+  id               String         @id @default(cuid())
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id])
+  wasteTypeId      String
+  wasteType        WasteType      @relation(fields: [wasteTypeId], references: [id])
+  itemCount        Int
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([studentProfileId, wasteTypeId])
+}
+
+model PointAdjustment {
+  id                   String                @id @default(cuid())
+  studentProfileId     String
+  studentProfile       StudentProfile        @relation(fields: [studentProfileId], references: [id])
+  createdByUserId      String
+  createdByUser        User                  @relation("PointAdjustmentsCreated", fields: [createdByUserId], references: [id])
+  relatedExchangeId    String?
+  relatedExchange      Exchange?             @relation(fields: [relatedExchangeId], references: [id])
+  pointDelta           Int
+  reason               String
+  remainderAdjustments RemainderAdjustment[]
+  createdAt            DateTime              @default(now())
+
+  @@index([studentProfileId, createdAt])
+}
+
+model RemainderAdjustment {
+  id                String          @id @default(cuid())
+  pointAdjustmentId String
+  pointAdjustment   PointAdjustment @relation(fields: [pointAdjustmentId], references: [id])
+  studentProfileId  String
+  studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id])
+  wasteTypeId       String
+  wasteType         WasteType       @relation(fields: [wasteTypeId], references: [id])
+  previousRemainder Int
+  newRemainder      Int
+  reason            String
+  createdAt         DateTime        @default(now())
+
+  @@index([studentProfileId, wasteTypeId])
+}
