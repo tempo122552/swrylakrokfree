@@ -33,6 +33,8 @@ npm run dev
 
 ## Deploy
 
-ก่อนใช้งานจริงให้อ่าน checklist ที่ [docs/deployment-readiness.html](docs/deployment-readiness.html)
+โปรเจกต์นี้เตรียมสำหรับ deploy ฟรีด้วย Render Free + Supabase Postgres Free แล้ว
+
+อ่านขั้นตอนที่ [docs/render-deploy.md](docs/render-deploy.md)
 
 หลัง deploy ตรวจสถานะระบบได้ที่ `/api/health`

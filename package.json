@@ -16,7 +16,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:deploy": "prisma db push --skip-generate",
+    "db:deploy": "prisma migrate deploy",
     "db:bootstrap": "node prisma/bootstrap-production.mjs",
     "db:seed": "prisma db seed",
     "verify": "npm run lint && npm run test && npm run build"
