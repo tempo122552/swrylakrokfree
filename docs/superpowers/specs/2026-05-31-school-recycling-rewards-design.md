@@ -82,6 +82,7 @@ Teachers can:
 
 - Import student data from CSV or Excel.
 - Add or edit individual student records.
+- Delete mistakenly imported student records only when they have no exchange, remainder, or adjustment history.
 - View reports and classroom rankings.
 - View exchange and adjustment history for oversight.
 
@@ -96,6 +97,7 @@ Teachers cannot:
 A system teacher can:
 
 - Create and manage teacher and staff accounts.
+- Assign the shared initial password `Password123!` to newly created adult accounts, with first-login password change required.
 - Manage waste types and point rates.
 - Deactivate waste types that should no longer be used.
 
@@ -368,6 +370,7 @@ Student total points are calculated from confirmed exchanges plus point adjustme
 - Students log in with student ID and password.
 - Adult users log in with their assigned account name and password.
 - Imported students use the shared initial password `Password123!` and must change it on first login.
+- Newly created staff and teacher accounts also use `Password123!` as the initial password and must change it on first login.
 - Password hashes are stored instead of plain-text passwords.
 - Server Actions must validate input and re-check role permissions.
 - The Data Access Layer must return minimal DTOs for client rendering.
@@ -417,6 +420,7 @@ Workflow tests:
 
 - Import valid student file.
 - Reject import rows with missing required fields.
+- Delete a mistakenly imported student with no history, and block deletion when exchange, remainder, or adjustment history exists.
 - Create exchange with review step.
 - Create adjustment with required reason.
 - Render student dashboard with total points, rank, remainders, and history.
@@ -434,5 +438,5 @@ UI checks:
 - Read the relevant Next.js 16 docs before changing route, form, auth, or data-access code.
 - Prefer Server Components and Server Actions where they fit.
 - Keep authorization close to the Data Access Layer and inside mutations.
-- Use active/inactive flags for accounts and waste types instead of deleting records that affect history.
+- Use active/inactive flags for accounts and waste types instead of deleting records that affect history. Hard-delete students only when the account has no exchange, remainder, or adjustment records.
 - Keep the MVP focused on point accumulation and reporting. Reward redemption can be a later project.

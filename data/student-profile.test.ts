@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildTeacherStudentProfileView,
+  canHardDeleteStudent,
   parseTeacherStudentListFilters,
   parseTeacherStudentUpdateInput,
 } from "./students";
@@ -191,5 +192,48 @@ describe("parseTeacherStudentListFilters", () => {
       page: 1,
       pageSize: 25,
     });
+  });
+});
+
+describe("canHardDeleteStudent", () => {
+  it("allows deleting a student with no activity records", () => {
+    expect(
+      canHardDeleteStudent({
+        exchanges: 0,
+        remainders: 0,
+        pointAdjustments: 0,
+        remainderAdjustments: 0,
+      }),
+    ).toBe(true);
+  });
+
+  it("blocks deleting a student with exchange history", () => {
+    expect(
+      canHardDeleteStudent({
+        exchanges: 1,
+        remainders: 0,
+        pointAdjustments: 0,
+        remainderAdjustments: 0,
+      }),
+    ).toBe(false);
+  });
+
+  it("blocks deleting a student with remainder or adjustment history", () => {
+    expect(
+      canHardDeleteStudent({
+        exchanges: 0,
+        remainders: 1,
+        pointAdjustments: 0,
+        remainderAdjustments: 0,
+      }),
+    ).toBe(false);
+    expect(
+      canHardDeleteStudent({
+        exchanges: 0,
+        remainders: 0,
+        pointAdjustments: 1,
+        remainderAdjustments: 0,
+      }),
+    ).toBe(false);
   });
 });

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseStudentFile, parseStudentRows } from "@/data/import-students";
 import {
+  deleteTeacherStudentProfile,
   findExistingStudentIds,
   importStudents,
   resetTeacherStudentPassword,
@@ -36,6 +37,10 @@ export type ResetStudentPasswordState = {
   message: string;
   initialPassword?: string;
   studentId?: string;
+};
+
+export type DeleteStudentProfileState = {
+  message: string;
 };
 
 export async function previewImportStudentsAction(
@@ -203,6 +208,31 @@ export async function resetStudentPasswordAction(
         error instanceof Error ? error.message : "รีเซ็ตรหัสผ่านนักเรียนไม่สำเร็จ",
     };
   }
+}
+
+export async function deleteStudentProfileAction(
+  _state: DeleteStudentProfileState,
+  formData: FormData,
+): Promise<DeleteStudentProfileState> {
+  let redirectTo = "/teacher/students";
+
+  try {
+    const deleted = await deleteTeacherStudentProfile(
+      await getCurrentUser(),
+      String(formData.get("studentProfileId") ?? ""),
+    );
+
+    revalidatePath("/teacher/students");
+    revalidatePath(`/teacher/students/${encodeURIComponent(deleted.studentId)}`);
+    redirectTo = `/teacher/students?deleted=${encodeURIComponent(deleted.studentId)}`;
+  } catch (error) {
+    return {
+      message:
+        error instanceof Error ? error.message : "ลบนักเรียนไม่สำเร็จ",
+    };
+  }
+
+  redirect(redirectTo);
 }
 
 export async function createWasteTypeAction(formData: FormData) {

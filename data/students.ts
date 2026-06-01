@@ -19,6 +19,22 @@ function totalFromParts(
   );
 }
 
+export type StudentDeletionUsageCounts = {
+  exchanges: number;
+  remainders: number;
+  pointAdjustments: number;
+  remainderAdjustments: number;
+};
+
+export function canHardDeleteStudent(counts: StudentDeletionUsageCounts) {
+  return (
+    counts.exchanges === 0 &&
+    counts.remainders === 0 &&
+    counts.pointAdjustments === 0 &&
+    counts.remainderAdjustments === 0
+  );
+}
+
 const teacherStudentUpdateSchema = z.object({
   studentId: z
     .string()
@@ -546,6 +562,51 @@ export async function resetTeacherStudentPassword(
     fullName: profile.fullName,
     initialPassword,
   };
+}
+
+export async function deleteTeacherStudentProfile(
+  currentUser: CurrentUser | null,
+  studentProfileId: string,
+) {
+  requireRole(currentUser, [UserRole.TEACHER]);
+
+  return prisma.$transaction(async (tx) => {
+    const profile = await tx.studentProfile.findUnique({
+      where: { id: studentProfileId },
+      select: {
+        id: true,
+        userId: true,
+        studentId: true,
+        fullName: true,
+        _count: {
+          select: {
+            exchanges: true,
+            remainders: true,
+            pointAdjustments: true,
+            remainderAdjustments: true,
+          },
+        },
+      },
+    });
+
+    if (!profile) {
+      throw new Error("ไม่พบนักเรียนที่ต้องการลบ");
+    }
+
+    if (!canHardDeleteStudent(profile._count)) {
+      throw new Error(
+        "นักเรียนคนนี้มีประวัติการใช้งานแล้ว แนะนำให้ปิดบัญชีแทนการลบเพื่อเก็บประวัติรายงาน",
+      );
+    }
+
+    await tx.studentProfile.delete({ where: { id: profile.id } });
+    await tx.user.delete({ where: { id: profile.userId } });
+
+    return {
+      studentId: profile.studentId,
+      fullName: profile.fullName,
+    };
+  });
 }
 
 export async function findExistingStudentIds(studentIds: string[]) {

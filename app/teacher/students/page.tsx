@@ -22,6 +22,7 @@ type TeacherStudentsSearchParams = {
   status?: string | string[];
   page?: string | string[];
   pageSize?: string | string[];
+  deleted?: string | string[];
 };
 
 const statusOptions: Array<{ value: TeacherStudentStatusFilter; label: string }> = [
@@ -70,7 +71,11 @@ export default async function TeacherStudentsPage({
   searchParams: Promise<TeacherStudentsSearchParams>;
 }) {
   const currentUser = await requirePageRole([UserRole.TEACHER]);
-  const filters = parseTeacherStudentListFilters(await searchParams);
+  const query = await searchParams;
+  const filters = parseTeacherStudentListFilters(query);
+  const deletedStudentId = Array.isArray(query.deleted)
+    ? query.deleted[0]
+    : query.deleted;
   const [studentPage, classrooms] = await Promise.all([
     listStudentsForTeacherWithFilters(currentUser, filters),
     listStudentClassroomsForTeacher(currentUser),
@@ -96,6 +101,11 @@ export default async function TeacherStudentsPage({
       navItems={teacherNavItems}
     >
       <ImportStudentsForm />
+      {deletedStudentId ? (
+        <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800">
+          ลบนักเรียนเลขประจำตัว {deletedStudentId} แล้ว
+        </p>
+      ) : null}
       <section className="mt-6">
         <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
           <div>

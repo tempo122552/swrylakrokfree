@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs";
 
-export const defaultStudentInitialPassword = "Password123!";
+export const defaultSharedInitialPassword = "Password123!";
+export const defaultStudentInitialPassword = defaultSharedInitialPassword;
+export const defaultAdultInitialPassword = defaultSharedInitialPassword;
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 12);

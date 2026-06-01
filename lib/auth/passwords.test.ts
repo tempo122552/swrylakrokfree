@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  defaultAdultInitialPassword,
   defaultStudentInitialPassword,
   generateInitialPassword,
   hashPassword,
@@ -22,5 +23,9 @@ describe("password helpers", () => {
 
   it("uses a shared initial password for imported students", () => {
     expect(defaultStudentInitialPassword).toBe("Password123!");
+  });
+
+  it("uses a shared initial password for new adult accounts", () => {
+    expect(defaultAdultInitialPassword).toBe("Password123!");
   });
 });

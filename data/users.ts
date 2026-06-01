@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/data/db";
 import { requireRole, requireSystemTeacher, type CurrentUser } from "@/data/permissions";
 import {
-  generateInitialPassword,
+  defaultAdultInitialPassword,
   hashPassword,
   verifyPassword,
 } from "@/lib/auth/passwords";
@@ -127,7 +127,7 @@ export async function createAdultAccount(
     throw new Error("กรอกชื่อบัญชีและชื่อผู้ใช้ให้ครบ");
   }
 
-  const initialPassword = generateInitialPassword();
+  const initialPassword = defaultAdultInitialPassword;
   const passwordHash = await hashPassword(initialPassword);
   const role = input.role === UserRole.TEACHER ? UserRole.TEACHER : UserRole.STAFF;
 
