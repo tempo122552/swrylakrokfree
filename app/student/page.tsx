@@ -6,6 +6,12 @@ import { StatCard } from "@/components/ui/stat-card";
 import { getStudentDashboard } from "@/data/students";
 import { requirePageRole } from "@/lib/auth/require-page-role";
 
+function formatWasteRate(item: { itemsPerPoint: number; pointsPerUnit: number }) {
+  return `${item.itemsPerPoint.toLocaleString("th-TH")} ชิ้น / ${item.pointsPerUnit.toLocaleString(
+    "th-TH",
+  )} แต้ม`;
+}
+
 export default async function StudentDashboardPage() {
   const currentUser = await requirePageRole([UserRole.STUDENT]);
   const dashboard = await getStudentDashboard(currentUser);
@@ -13,7 +19,7 @@ export default async function StudentDashboardPage() {
   return (
     <AppShell
       title="หน้าของนักเรียน"
-      subtitle={`${dashboard.student.fullName} · ${dashboard.student.classroom}`}
+      subtitle={`${dashboard.student.fullName} / ${dashboard.student.classroom}`}
       navItems={[
         { href: "/student", label: "แต้มของฉัน" },
         { href: "/student/history", label: "ประวัติ" },
@@ -54,15 +60,13 @@ export default async function StudentDashboardPage() {
                   key={item.wasteTypeName}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <h3 className="font-black text-slate-950">
-                      {item.wasteTypeName}
-                    </h3>
+                    <h3 className="font-black text-slate-950">{item.wasteTypeName}</h3>
                     <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-sm font-black text-emerald-800">
                       {item.itemCount} ชิ้น
                     </span>
                   </div>
                   <p className="mt-2 text-sm font-bold text-slate-600">
-                    {item.itemsPerPoint} ชิ้น / 1 แต้ม
+                    {formatWasteRate(item)}
                   </p>
                 </article>
               ))
@@ -78,7 +82,7 @@ export default async function StudentDashboardPage() {
               rows={dashboard.remainders.map((item) => [
                 item.wasteTypeName,
                 `${item.itemCount} ชิ้น`,
-                `${item.itemsPerPoint} ชิ้น / 1 แต้ม`,
+                formatWasteRate(item),
               ])}
             />
           </div>

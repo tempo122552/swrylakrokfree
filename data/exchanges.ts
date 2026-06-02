@@ -74,6 +74,7 @@ export async function createExchange(
         previousRemainder,
         itemCount: item.itemCount,
         itemsPerPoint: wasteType.itemsPerPoint,
+        pointsPerUnit: wasteType.pointsPerUnit,
       });
 
       totalPointsEarned += effect.pointsEarned;

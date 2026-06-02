@@ -2,6 +2,7 @@ import { UserRole } from "@prisma/client";
 import {
   Activity,
   ArrowRight,
+  CalendarDays,
   DatabaseBackup,
   Download,
   History,
@@ -23,14 +24,30 @@ function formatNumber(value: number) {
   return value.toLocaleString("th-TH");
 }
 
-export default async function TeacherPage() {
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("th-TH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Bangkok",
+  });
+}
+
+export default async function TeacherPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string; month?: string; termId?: string }>;
+}) {
   const currentUser = await requirePageRole([UserRole.TEACHER]);
-  const dashboard = await getTeacherDashboard(currentUser);
+  const params = await searchParams;
+  const dashboard = await getTeacherDashboard(currentUser, params);
+  const period = dashboard.period;
+  const monthValue =
+    period.mode === "month" && period.month ? period.month : params.month ?? "";
   const quickLinks = [
     {
       href: "/teacher/history",
       label: "ดูประวัติการแลก",
-      detail: "ตรวจรายการล่าสุดและส่งออกข้อมูลเฉพาะช่วง",
+      detail: "ตรวจรายการย้อนหลังและส่งออกข้อมูลเฉพาะช่วง",
       icon: History,
     },
     {
@@ -53,33 +70,117 @@ export default async function TeacherPage() {
       subtitle="ติดตามแต้ม ห้องเรียน และสัดส่วนชนิดขยะจากข้อมูลการแลกขยะ"
       navItems={teacherNavItems}
     >
-      <div className="mb-5 flex flex-col gap-3 rounded-lg border border-emerald-100 bg-white/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <section className="mb-5 rounded-lg border border-emerald-100 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-black text-emerald-700">ช่วงรายงาน</p>
+            <h2 className="mt-1 text-xl font-black text-slate-950">
+              {period.label}
+            </h2>
+            <p className="mt-1 text-sm font-bold text-slate-600">
+              เลือกสรุปเป็นรายเดือนหรือรายภาคเรียนได้จากข้อมูลที่บันทึกจริง
+            </p>
+          </div>
+          <div className="grid gap-3 lg:grid-cols-2">
+            <form className="flex flex-col gap-2 rounded-lg bg-emerald-50 p-3 sm:flex-row sm:items-end">
+              <input name="mode" type="hidden" value="month" />
+              <label className="grid gap-1 text-sm font-bold text-emerald-900">
+                เดือน
+                <input
+                  className="min-h-11 rounded-md border border-emerald-200 bg-white px-3 py-2 text-slate-950"
+                  defaultValue={monthValue}
+                  name="month"
+                  type="month"
+                />
+              </label>
+              <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-black text-white hover:bg-emerald-800">
+                <CalendarDays aria-hidden size={16} />
+                ดูรายเดือน
+              </button>
+            </form>
+            {dashboard.availableTerms.length > 0 ? (
+              <form className="flex flex-col gap-2 rounded-lg bg-slate-50 p-3 sm:flex-row sm:items-end">
+                <input name="mode" type="hidden" value="term" />
+                <label className="grid gap-1 text-sm font-bold text-slate-800">
+                  ภาคเรียน
+                  <select
+                    className="min-h-11 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-950"
+                    defaultValue={period.termId ?? dashboard.availableTerms[0]?.id}
+                    name="termId"
+                  >
+                    {dashboard.availableTerms.map((term) => (
+                      <option key={term.id} value={term.id}>
+                        {term.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-800 hover:bg-slate-100">
+                  ดูภาคเรียน
+                </button>
+              </form>
+            ) : (
+              <Link
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-800 hover:bg-slate-50"
+                href="/teacher/terms"
+              >
+                เพิ่มภาคเรียน
+              </Link>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div className="mb-5 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white/90 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-black text-emerald-700">รายงาน Excel</p>
+          <p className="text-sm font-black text-emerald-700">รายงาน Excel และสำรองข้อมูล</p>
           <p className="text-sm text-slate-600">
             ดาวน์โหลดข้อมูลนักเรียน รายการแลกขยะ อันดับห้องเรียน และสรุปชนิดขยะ
           </p>
         </div>
-        <Link
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-black text-white hover:bg-emerald-800"
-          href="/teacher/export"
-        >
-          <Download aria-hidden size={18} />
-          ดาวน์โหลด Excel
-        </Link>
-        <Link
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-200 bg-white px-4 py-2 text-sm font-black text-emerald-800 hover:bg-emerald-50"
-          href="/teacher/backup"
-        >
-          <DatabaseBackup aria-hidden size={18} />
-          สำรองข้อมูลทั้งหมด
-        </Link>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-sm font-black text-white hover:bg-emerald-800"
+            href="/teacher/export"
+          >
+            <Download aria-hidden size={18} />
+            ดาวน์โหลด Excel
+          </Link>
+          <Link
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-emerald-200 bg-white px-4 py-2 text-sm font-black text-emerald-800 hover:bg-emerald-50"
+            href="/teacher/backup"
+          >
+            <DatabaseBackup aria-hidden size={18} />
+            สำรองข้อมูลทั้งหมด
+          </Link>
+        </div>
       </div>
+
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="นักเรียน" tone="blue" value={dashboard.totals.students} />
-        <StatCard label="รายการแลกขยะ" tone="emerald" value={dashboard.totals.exchanges} />
-        <StatCard label="แต้มรวม" tone="amber" value={dashboard.totals.points} />
-        <StatCard label="จำนวนชิ้นรวม" tone="rose" value={dashboard.totals.itemCount} />
+        <StatCard
+          detail="บัญชีนักเรียนทั้งหมด"
+          label="นักเรียน"
+          tone="blue"
+          value={dashboard.totals.students}
+        />
+        <StatCard
+          detail={period.label}
+          label="รายการแลกขยะ"
+          tone="emerald"
+          value={dashboard.totals.exchanges}
+        />
+        <StatCard
+          detail={period.label}
+          label="แต้มรวม"
+          tone="amber"
+          value={dashboard.totals.points}
+        />
+        <StatCard
+          detail={period.label}
+          label="จำนวนชิ้นรวม"
+          tone="rose"
+          value={dashboard.totals.itemCount}
+        />
       </div>
 
       <section className="mt-6 grid gap-4 xl:grid-cols-3">
@@ -90,7 +191,7 @@ export default async function TeacherPage() {
             </span>
             <div>
               <h2 className="text-base font-black text-slate-950">กิจกรรมวันนี้</h2>
-              <p className="text-sm font-bold text-slate-500">รายการแลกขยะที่บันทึกวันนี้</p>
+              <p className="text-sm font-bold text-slate-500">รายการที่บันทึกวันนี้</p>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3">
@@ -121,8 +222,8 @@ export default async function TeacherPage() {
               <Trophy aria-hidden size={20} />
             </span>
             <div>
-              <h2 className="text-base font-black text-slate-950">ห้องที่แลกขยะมากที่สุด</h2>
-              <p className="text-sm font-bold text-slate-500">จัดจากจำนวนชิ้นสะสม</p>
+              <h2 className="text-base font-black text-slate-950">ห้องที่แลกมากที่สุด</h2>
+              <p className="text-sm font-bold text-slate-500">จัดจากจำนวนชิ้นในช่วงรายงาน</p>
             </div>
           </div>
           <p className="mt-4 text-3xl font-black text-slate-950">
@@ -130,7 +231,9 @@ export default async function TeacherPage() {
           </p>
           <p className="mt-1 text-sm font-bold text-slate-600">
             {dashboard.highlights.topClassroom
-              ? `${formatNumber(dashboard.highlights.topClassroom.items)} ชิ้น · ${formatNumber(dashboard.highlights.topClassroom.points)} แต้ม`
+              ? `${formatNumber(dashboard.highlights.topClassroom.items)} ชิ้น / ${formatNumber(
+                  dashboard.highlights.topClassroom.points,
+                )} แต้ม`
               : "เริ่มบันทึกรายการแลกขยะเพื่อดูสรุป"}
           </p>
         </div>
@@ -142,7 +245,7 @@ export default async function TeacherPage() {
             </span>
             <div>
               <h2 className="text-base font-black text-slate-950">ชนิดขยะยอดนิยม</h2>
-              <p className="text-sm font-bold text-slate-500">จากจำนวนชิ้นรวมทั้งระบบ</p>
+              <p className="text-sm font-bold text-slate-500">จากจำนวนชิ้นในช่วงรายงาน</p>
             </div>
           </div>
           <p className="mt-4 text-3xl font-black text-slate-950">
@@ -151,7 +254,7 @@ export default async function TeacherPage() {
           <p className="mt-1 text-sm font-bold text-slate-600">
             {dashboard.highlights.topWasteType
               ? `${formatNumber(dashboard.highlights.topWasteType.itemCount)} ชิ้น`
-              : "ยังไม่มีรายการขยะในระบบ"}
+              : "ยังไม่มีรายการขยะในช่วงนี้"}
           </p>
         </div>
       </section>
@@ -203,15 +306,17 @@ export default async function TeacherPage() {
           wasteTypePie={dashboard.wasteTypePie}
         />
       </div>
+
       <section className="mt-6">
-        <h2 className="mb-3 text-lg font-black">รายการล่าสุด</h2>
+        <h2 className="mb-3 text-lg font-black">รายการล่าสุดในช่วงรายงาน</h2>
         <DataTable
+          emptyText="ยังไม่มีรายการในช่วงรายงานนี้"
           headers={["วันที่", "นักเรียน", "ห้องเรียน", "แต้ม"]}
           rows={dashboard.recentExchanges.map((exchange) => [
-            new Date(exchange.createdAt).toLocaleString("th-TH"),
+            formatDateTime(exchange.createdAt),
             exchange.studentName,
             exchange.classroom,
-            exchange.totalPointsEarned,
+            formatNumber(exchange.totalPointsEarned),
           ])}
         />
       </section>

@@ -2,6 +2,7 @@ export type PointCalculationInput = {
   previousRemainder: number;
   itemCount: number;
   itemsPerPoint: number;
+  pointsPerUnit: number;
 };
 
 export type PointCalculationResult = {
@@ -21,10 +22,12 @@ export function calculatePointEffect({
   previousRemainder,
   itemCount,
   itemsPerPoint,
+  pointsPerUnit,
 }: PointCalculationInput): PointCalculationResult {
   assertInteger("previousRemainder", previousRemainder, 0);
   assertInteger("itemCount", itemCount, 1);
   assertInteger("itemsPerPoint", itemsPerPoint, 1);
+  assertInteger("pointsPerUnit", pointsPerUnit, 1);
 
   if (previousRemainder >= itemsPerPoint) {
     throw new Error("previousRemainder must be less than itemsPerPoint");
@@ -34,7 +37,7 @@ export function calculatePointEffect({
 
   return {
     totalCountedItems,
-    pointsEarned: Math.floor(totalCountedItems / itemsPerPoint),
+    pointsEarned: Math.floor(totalCountedItems / itemsPerPoint) * pointsPerUnit,
     newRemainder: totalCountedItems % itemsPerPoint,
   };
 }

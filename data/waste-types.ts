@@ -24,7 +24,7 @@ export async function listWasteTypes() {
 
 export async function createWasteType(
   currentUser: CurrentUser | null,
-  input: { name: string; itemsPerPoint: number },
+  input: { name: string; itemsPerPoint: number; pointsPerUnit: number },
 ) {
   requireSystemTeacher(currentUser);
 
@@ -34,6 +34,10 @@ export async function createWasteType(
 
   if (!Number.isInteger(input.itemsPerPoint) || input.itemsPerPoint < 1) {
     throw new Error("อัตราแต้มต้องเป็นจำนวนเต็มบวก");
+  }
+
+  if (!Number.isInteger(input.pointsPerUnit) || input.pointsPerUnit < 1) {
+    throw new Error("pointsPerUnit must be a positive integer");
   }
 
   const name = input.name.trim();
@@ -46,6 +50,7 @@ export async function createWasteType(
       where: { id: existing.id },
       data: {
         itemsPerPoint: input.itemsPerPoint,
+        pointsPerUnit: input.pointsPerUnit,
         isActive: true,
       },
     });
@@ -55,6 +60,7 @@ export async function createWasteType(
     data: {
       name,
       itemsPerPoint: input.itemsPerPoint,
+      pointsPerUnit: input.pointsPerUnit,
     },
   });
 }

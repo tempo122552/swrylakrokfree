@@ -31,34 +31,49 @@ const teacher = { id: "teacher_1" } as never;
 describe("createWasteType", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.wasteType.create.mockReset();
+    mocks.wasteType.findUnique.mockReset();
+    mocks.wasteType.update.mockReset();
   });
 
   it("reactivates an existing waste type instead of creating a duplicate", async () => {
     mocks.wasteType.findUnique.mockResolvedValue({
       id: "waste_type_1",
-      name: "ขวดพลาสติก",
+      name: "plastic bottle",
       isActive: false,
     });
     mocks.wasteType.update.mockResolvedValue({
       id: "waste_type_1",
-      name: "ขวดพลาสติก",
+      name: "plastic bottle",
       itemsPerPoint: 2,
+      pointsPerUnit: 300,
       isActive: true,
     });
 
     await createWasteType(teacher, {
-      name: " ขวดพลาสติก ",
+      name: " plastic bottle ",
       itemsPerPoint: 2,
+      pointsPerUnit: 300,
     });
 
     expect(mocks.wasteType.findUnique).toHaveBeenCalledWith({
-      where: { name: "ขวดพลาสติก" },
+      where: { name: "plastic bottle" },
     });
     expect(mocks.wasteType.update).toHaveBeenCalledWith({
       where: { id: "waste_type_1" },
-      data: { itemsPerPoint: 2, isActive: true },
+      data: { itemsPerPoint: 2, pointsPerUnit: 300, isActive: true },
     });
     expect(mocks.wasteType.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-positive points per unit", async () => {
+    await expect(
+      createWasteType(teacher, {
+        name: "old phone",
+        itemsPerPoint: 1,
+        pointsPerUnit: 0,
+      }),
+    ).rejects.toThrow("pointsPerUnit must be a positive integer");
   });
 });
 
@@ -92,7 +107,7 @@ describe("deleteWasteType", () => {
   it("deletes an unused waste type", async () => {
     mocks.wasteType.findUnique.mockResolvedValue({
       id: "waste_type_1",
-      name: "ขยะผิด",
+      name: "wrong waste",
       _count: {
         exchangeItems: 0,
         remainders: 0,
@@ -101,7 +116,7 @@ describe("deleteWasteType", () => {
     });
     mocks.wasteType.delete.mockResolvedValue({
       id: "waste_type_1",
-      name: "ขยะผิด",
+      name: "wrong waste",
     });
 
     await deleteWasteType(teacher, "waste_type_1");

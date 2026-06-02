@@ -36,6 +36,7 @@ describe("buildTeacherBackupWorkbookData", () => {
           id: "waste_plastic_bottle",
           name: "ขวดพลาสติก",
           itemsPerPoint: 1,
+          pointsPerUnit: 300,
           isActive: true,
           createdAt: new Date("2026-05-31T03:00:00.000Z"),
           updatedAt: new Date("2026-05-31T03:30:00.000Z"),
@@ -124,6 +125,10 @@ describe("buildTeacherBackupWorkbookData", () => {
     expect(workbookData.students[0]).toMatchObject({
       studentId: "10001",
       classroom: "ม.1/1",
+    });
+    expect(workbookData.wasteTypes[0]).toMatchObject({
+      itemsPerPoint: 1,
+      pointsPerUnit: 300,
     });
     expect(workbookData.exchanges[0]).toMatchObject({
       id: "exchange_1",

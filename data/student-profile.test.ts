@@ -22,7 +22,7 @@ describe("buildTeacherStudentProfileView", () => {
       remainders: [
         {
           itemCount: 2,
-          wasteType: { name: "ฉลากพลาสติก", itemsPerPoint: 3 },
+          wasteType: { name: "ฉลากพลาสติก", itemsPerPoint: 3, pointsPerUnit: 1 },
         },
       ],
       exchanges: [
@@ -77,6 +77,7 @@ describe("buildTeacherStudentProfileView", () => {
         wasteTypeName: "ฉลากพลาสติก",
         itemCount: 2,
         itemsPerPoint: 3,
+        pointsPerUnit: 1,
         itemsUntilNextPoint: 1,
       },
     ]);

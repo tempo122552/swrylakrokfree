@@ -10,6 +10,7 @@ type WasteTypeOption = {
   id: string;
   name: string;
   itemsPerPoint: number;
+  pointsPerUnit: number;
 };
 
 type Row = {
@@ -38,7 +39,11 @@ export function ExchangeForm({
         return {
           ...row,
           wasteTypeName: wasteType?.name ?? "-",
-          points: wasteType ? Math.floor(row.itemCount / wasteType.itemsPerPoint) : 0,
+          itemsPerPoint: wasteType?.itemsPerPoint ?? 1,
+          pointsPerUnit: wasteType?.pointsPerUnit ?? 1,
+          points: wasteType
+            ? Math.floor(row.itemCount / wasteType.itemsPerPoint) * wasteType.pointsPerUnit
+            : 0,
           remainder: wasteType ? row.itemCount % wasteType.itemsPerPoint : 0,
         };
       }),
@@ -83,7 +88,8 @@ export function ExchangeForm({
               >
                 {wasteTypes.map((wasteType) => (
                   <option key={wasteType.id} value={wasteType.id}>
-                    {wasteType.name} ({wasteType.itemsPerPoint} ชิ้น/แต้ม)
+                    {wasteType.name} ({wasteType.itemsPerPoint} ชิ้น /{" "}
+                    {wasteType.pointsPerUnit} แต้ม)
                   </option>
                 ))}
               </select>
@@ -139,6 +145,9 @@ export function ExchangeForm({
           {previewRows.map((row) => (
             <div className="rounded-lg bg-slate-50 p-3" key={row.id}>
               <p className="font-bold">{row.wasteTypeName}</p>
+              <p className="text-xs font-bold text-emerald-700">
+                กติกา {row.itemsPerPoint} ชิ้น / {row.pointsPerUnit} แต้ม
+              </p>
               <p className="text-sm text-slate-600">
                 {row.itemCount} ชิ้น · ประมาณ {row.points} แต้ม · เศษ {row.remainder} ชิ้น
               </p>

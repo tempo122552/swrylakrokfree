@@ -3,6 +3,7 @@
 import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAcademicTerm } from "@/data/academic-terms";
 import { parseStudentFile, parseStudentRows } from "@/data/import-students";
 import {
   deleteTeacherStudentProfile,
@@ -246,6 +247,7 @@ export async function createWasteTypeAction(formData: FormData) {
     await createWasteType(await getCurrentUser(), {
       name: String(formData.get("name") ?? ""),
       itemsPerPoint: Number(formData.get("itemsPerPoint") ?? 0),
+      pointsPerUnit: Number(formData.get("pointsPerUnit") ?? 0),
     });
     revalidatePath("/teacher/waste-types");
     redirectTo = "/teacher/waste-types?saved=1";
@@ -298,6 +300,29 @@ export async function deleteWasteTypeAction(formData: FormData) {
         error instanceof Error ? error.message : "ลบชนิดขยะไม่สำเร็จ",
     });
     redirectTo = `/teacher/waste-types?${params.toString()}`;
+  }
+
+  redirect(redirectTo);
+}
+
+export async function createAcademicTermAction(formData: FormData) {
+  let redirectTo = "/teacher/terms";
+
+  try {
+    await createAcademicTerm(await getCurrentUser(), {
+      name: String(formData.get("name") ?? ""),
+      startsAt: String(formData.get("startsAt") ?? ""),
+      endsAt: String(formData.get("endsAt") ?? ""),
+    });
+    revalidatePath("/teacher");
+    revalidatePath("/teacher/terms");
+    redirectTo = "/teacher/terms?saved=1";
+  } catch (error) {
+    const params = new URLSearchParams({
+      error:
+        error instanceof Error ? error.message : "บันทึกภาคเรียนไม่สำเร็จ",
+    });
+    redirectTo = `/teacher/terms?${params.toString()}`;
   }
 
   redirect(redirectTo);

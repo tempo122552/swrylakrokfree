@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildTeacherDashboardView,
   buildTeacherExportWorkbookData,
+  resolveTeacherDashboardPeriod,
 } from "./reports";
 
 describe("buildTeacherExportWorkbookData", () => {
@@ -75,6 +76,110 @@ describe("buildTeacherExportWorkbookData", () => {
 });
 
 describe("buildTeacherDashboardView", () => {
+  it("resolves a selected month to Bangkok month boundaries", () => {
+    const period = resolveTeacherDashboardPeriod({
+      mode: "month",
+      month: "2026-05",
+      now: new Date("2026-06-02T05:00:00.000Z"),
+      terms: [],
+    });
+
+    expect(period.mode).toBe("month");
+    expect(period.startsAt.toISOString()).toBe("2026-04-30T17:00:00.000Z");
+    expect(period.endsAt.toISOString()).toBe("2026-05-31T17:00:00.000Z");
+  });
+
+  it("filters dashboard totals to the selected reporting period", () => {
+    const inPeriod = new Date("2026-05-10T05:00:00.000Z");
+    const outsidePeriod = new Date("2026-06-10T05:00:00.000Z");
+    const dashboard = buildTeacherDashboardView({
+      now: inPeriod,
+      period: {
+        mode: "month",
+        label: "พฤษภาคม 2569",
+        startsAt: new Date("2026-04-30T17:00:00.000Z"),
+        endsAt: new Date("2026-05-31T17:00:00.000Z"),
+      },
+      students: [
+        {
+          classroom: "ม.1/1",
+          exchanges: [
+            { createdAt: inPeriod, totalPointsEarned: 300 },
+            { createdAt: outsidePeriod, totalPointsEarned: 50 },
+          ],
+          pointAdjustments: [
+            { createdAt: inPeriod, pointDelta: 10 },
+            { createdAt: outsidePeriod, pointDelta: 5 },
+          ],
+        },
+      ],
+      exchanges: [
+        { createdAt: inPeriod, totalPointsEarned: 300 },
+        { createdAt: outsidePeriod, totalPointsEarned: 50 },
+      ],
+      recentExchanges: [
+        {
+          id: "exchange_in_period",
+          createdAt: inPeriod,
+          totalPointsEarned: 300,
+          studentProfile: {
+            fullName: "นักเรียน ตัวอย่าง",
+            classroom: "ม.1/1",
+          },
+        },
+        {
+          id: "exchange_outside_period",
+          createdAt: outsidePeriod,
+          totalPointsEarned: 50,
+          studentProfile: {
+            fullName: "นักเรียน นอกช่วง",
+            classroom: "ม.1/1",
+          },
+        },
+      ],
+      exchangeItems: [
+        {
+          itemCount: 1,
+          wasteType: { name: "มือถือเก่า" },
+          exchange: {
+            createdAt: inPeriod,
+            studentProfile: { classroom: "ม.1/1" },
+          },
+        },
+        {
+          itemCount: 5,
+          wasteType: { name: "ขวดพลาสติก" },
+          exchange: {
+            createdAt: outsidePeriod,
+            studentProfile: { classroom: "ม.1/1" },
+          },
+        },
+      ],
+    } as Parameters<typeof buildTeacherDashboardView>[0] & {
+      period: {
+        mode: "month";
+        label: string;
+        startsAt: Date;
+        endsAt: Date;
+      };
+    });
+
+    expect(dashboard.period.label).toBe("พฤษภาคม 2569");
+    expect(dashboard.totals).toEqual({
+      students: 1,
+      exchanges: 1,
+      points: 310,
+      itemCount: 1,
+    });
+    expect(dashboard.classroomBars).toEqual([
+      { classroom: "ม.1/1", points: 310, items: 1 },
+    ]);
+    expect(dashboard.wasteTypePie).toEqual([
+      { wasteTypeName: "มือถือเก่า", itemCount: 1 },
+    ]);
+    expect(dashboard.recentExchanges).toHaveLength(1);
+  });
+
   it("summarizes teacher dashboard highlights and totals", () => {
     const today = new Date("2026-06-01T09:00:00.000Z");
     const yesterday = new Date("2026-05-31T09:00:00.000Z");
@@ -83,13 +188,13 @@ describe("buildTeacherDashboardView", () => {
       students: [
         {
           classroom: "ม.1/1",
-          exchanges: [{ totalPointsEarned: 10 }],
-          pointAdjustments: [{ pointDelta: 2 }],
+          exchanges: [{ createdAt: today, totalPointsEarned: 10 }],
+          pointAdjustments: [{ createdAt: today, pointDelta: 2 }],
         },
         {
           classroom: "ม.2/1",
-          exchanges: [{ totalPointsEarned: 6 }],
-          pointAdjustments: [{ pointDelta: -1 }],
+          exchanges: [{ createdAt: yesterday, totalPointsEarned: 6 }],
+          pointAdjustments: [{ createdAt: yesterday, pointDelta: -1 }],
         },
       ],
       exchanges: [
@@ -129,9 +234,9 @@ describe("buildTeacherDashboardView", () => {
 
     expect(dashboard.totals).toEqual({
       students: 2,
-      exchanges: 2,
-      points: 17,
-      itemCount: 16,
+      exchanges: 1,
+      points: 12,
+      itemCount: 12,
     });
     expect(dashboard.highlights.today).toEqual({
       exchangeCount: 1,

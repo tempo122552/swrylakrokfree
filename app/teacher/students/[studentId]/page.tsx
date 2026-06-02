@@ -11,6 +11,15 @@ import { requirePageRole } from "@/lib/auth/require-page-role";
 import { teacherNavItems } from "@/lib/navigation";
 import { StudentManagementPanel } from "./student-management-panel";
 
+function formatWasteRate(remainder: {
+  itemsPerPoint: number;
+  pointsPerUnit: number;
+}) {
+  return `${remainder.itemsPerPoint.toLocaleString("th-TH")} ชิ้น / ${remainder.pointsPerUnit.toLocaleString(
+    "th-TH",
+  )} แต้ม`;
+}
+
 export default async function TeacherStudentProfilePage({
   params,
   searchParams,
@@ -32,12 +41,12 @@ export default async function TeacherStudentProfilePage({
   return (
     <AppShell
       title={profile.student.fullName}
-      subtitle={`${profile.student.studentId} · ${profile.student.gradeLevel} · ${profile.student.classroom}`}
+      subtitle={`${profile.student.studentId} / ${profile.student.gradeLevel} / ${profile.student.classroom}`}
       navItems={teacherNavItems}
     >
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Link
-          className="inline-flex w-fit items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+          className="inline-flex min-h-10 w-fit items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
           href="/teacher/students"
         >
           <ArrowLeft aria-hidden size={16} />
@@ -122,7 +131,7 @@ export default async function TeacherStudentProfilePage({
           rows={profile.remainders.map((remainder) => [
             remainder.wasteTypeName,
             `${remainder.itemCount} ชิ้น`,
-            `${remainder.itemsPerPoint} ชิ้น / 1 แต้ม`,
+            formatWasteRate(remainder),
             remainder.itemsUntilNextPoint > 0
               ? `${remainder.itemsUntilNextPoint} ชิ้น`
               : "-",

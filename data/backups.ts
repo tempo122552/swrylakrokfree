@@ -31,6 +31,7 @@ type BackupWasteType = {
   id: string;
   name: string;
   itemsPerPoint: number;
+  pointsPerUnit: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -157,6 +158,7 @@ export function buildTeacherBackupWorkbookData({
       id: wasteType.id,
       name: wasteType.name,
       itemsPerPoint: wasteType.itemsPerPoint,
+      pointsPerUnit: wasteType.pointsPerUnit,
       isActive: formatStatus(wasteType.isActive),
       createdAt: formatDate(wasteType.createdAt),
       updatedAt: formatDate(wasteType.updatedAt),

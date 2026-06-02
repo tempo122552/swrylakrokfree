@@ -140,7 +140,7 @@ type TeacherStudentProfileRecord = {
   };
   remainders: Array<{
     itemCount: number;
-    wasteType: { name: string; itemsPerPoint: number };
+    wasteType: { name: string; itemsPerPoint: number; pointsPerUnit: number };
   }>;
   exchanges: Array<{
     id: string;
@@ -191,6 +191,7 @@ export function buildTeacherStudentProfileView(
         wasteTypeName: remainder.wasteType.name,
         itemCount: remainder.itemCount,
         itemsPerPoint: remainder.wasteType.itemsPerPoint,
+        pointsPerUnit: remainder.wasteType.pointsPerUnit,
         itemsUntilNextPoint:
           remainder.itemCount === 0
             ? 0
@@ -287,6 +288,7 @@ export async function getStudentDashboard(currentUser: CurrentUser | null) {
       wasteTypeName: remainder.wasteType.name,
       itemCount: remainder.itemCount,
       itemsPerPoint: remainder.wasteType.itemsPerPoint,
+      pointsPerUnit: remainder.wasteType.pointsPerUnit,
     })),
     recentExchanges: profile.exchanges.map((exchange) => ({
       id: exchange.id,

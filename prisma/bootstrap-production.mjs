@@ -50,9 +50,9 @@ await ensureAccount({
 });
 
 const wasteTypes = [
-  { name: "ขวดพลาสติก", itemsPerPoint: 1 },
-  { name: "ฝาขวด", itemsPerPoint: 1 },
-  { name: "ฉลากพลาสติก", itemsPerPoint: 3 },
+  { name: "ขวดพลาสติก", itemsPerPoint: 1, pointsPerUnit: 1 },
+  { name: "ฝาขวด", itemsPerPoint: 1, pointsPerUnit: 1 },
+  { name: "ฉลากพลาสติก", itemsPerPoint: 3, pointsPerUnit: 1 },
 ];
 
 for (const wasteType of wasteTypes) {
@@ -60,6 +60,7 @@ for (const wasteType of wasteTypes) {
     where: { name: wasteType.name },
     update: {
       itemsPerPoint: wasteType.itemsPerPoint,
+      pointsPerUnit: wasteType.pointsPerUnit,
       isActive: true,
     },
     create: wasteType,

@@ -8,10 +8,26 @@ describe("calculatePointEffect", () => {
         previousRemainder: 0,
         itemCount: 5,
         itemsPerPoint: 1,
+        pointsPerUnit: 1,
       }),
     ).toEqual({
       totalCountedItems: 5,
       pointsEarned: 5,
+      newRemainder: 0,
+    });
+  });
+
+  it("multiplies completed units by the configured points per unit", () => {
+    const input = {
+      previousRemainder: 0,
+      itemCount: 1,
+      itemsPerPoint: 1,
+      pointsPerUnit: 300,
+    } as Parameters<typeof calculatePointEffect>[0] & { pointsPerUnit: number };
+
+    expect(calculatePointEffect(input)).toEqual({
+      totalCountedItems: 1,
+      pointsEarned: 300,
       newRemainder: 0,
     });
   });
@@ -22,6 +38,7 @@ describe("calculatePointEffect", () => {
         previousRemainder: 0,
         itemCount: 2,
         itemsPerPoint: 3,
+        pointsPerUnit: 1,
       }),
     ).toEqual({
       totalCountedItems: 2,
@@ -36,6 +53,7 @@ describe("calculatePointEffect", () => {
         previousRemainder: 2,
         itemCount: 4,
         itemsPerPoint: 3,
+        pointsPerUnit: 1,
       }),
     ).toEqual({
       totalCountedItems: 6,
@@ -50,6 +68,7 @@ describe("calculatePointEffect", () => {
         previousRemainder: -1,
         itemCount: 1,
         itemsPerPoint: 3,
+        pointsPerUnit: 1,
       }),
     ).toThrow("previousRemainder must be a non-negative integer");
 
@@ -58,6 +77,7 @@ describe("calculatePointEffect", () => {
         previousRemainder: 0,
         itemCount: 0,
         itemsPerPoint: 3,
+        pointsPerUnit: 1,
       }),
     ).toThrow("itemCount must be a positive integer");
 
@@ -66,6 +86,7 @@ describe("calculatePointEffect", () => {
         previousRemainder: 0,
         itemCount: 1,
         itemsPerPoint: 0,
+        pointsPerUnit: 1,
       }),
     ).toThrow("itemsPerPoint must be a positive integer");
   });

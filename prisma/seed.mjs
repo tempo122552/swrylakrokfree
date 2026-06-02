@@ -37,15 +37,19 @@ await prisma.user.upsert({
 });
 
 const wasteTypes = [
-  { name: "ขวดพลาสติก", itemsPerPoint: 1 },
-  { name: "ฝาขวด", itemsPerPoint: 1 },
-  { name: "ฉลากพลาสติก", itemsPerPoint: 3 },
+  { name: "ขวดพลาสติก", itemsPerPoint: 1, pointsPerUnit: 1 },
+  { name: "ฝาขวด", itemsPerPoint: 1, pointsPerUnit: 1 },
+  { name: "ฉลากพลาสติก", itemsPerPoint: 3, pointsPerUnit: 1 },
 ];
 
 for (const wasteType of wasteTypes) {
   await prisma.wasteType.upsert({
     where: { name: wasteType.name },
-    update: { itemsPerPoint: wasteType.itemsPerPoint, isActive: true },
+    update: {
+      itemsPerPoint: wasteType.itemsPerPoint,
+      pointsPerUnit: wasteType.pointsPerUnit,
+      isActive: true,
+    },
     create: wasteType,
   });
 }
@@ -187,7 +191,8 @@ if (existingExchangeCount === 0) {
       });
       const previousRemainder = existingRemainder?.itemCount ?? 0;
       const combinedItems = previousRemainder + item.itemCount;
-      const pointsEarned = Math.floor(combinedItems / wasteType.itemsPerPoint);
+      const pointsEarned =
+        Math.floor(combinedItems / wasteType.itemsPerPoint) * wasteType.pointsPerUnit;
       const newRemainder = combinedItems % wasteType.itemsPerPoint;
 
       totalPointsEarned += pointsEarned;
