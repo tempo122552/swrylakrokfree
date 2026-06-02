@@ -100,6 +100,7 @@ A system teacher can:
 - Assign the shared initial password `Password123!` to newly created adult accounts, with first-login password change required.
 - Manage waste types and point rates.
 - Deactivate waste types that should no longer be used.
+- Delete mistakenly added waste types only when they have no exchange, remainder, or adjustment history.
 
 The system teacher is still a teacher role with extra permissions.
 
@@ -257,6 +258,7 @@ Constraints:
 
 - `itemsPerPoint` must be a positive integer.
 - Staff can only record active waste types.
+- Re-adding an inactive waste type with the same name reactivates that record and updates its point rate instead of creating a duplicate.
 
 Initial examples:
 
@@ -382,6 +384,7 @@ Student total points are calculated from confirmed exchanges plus point adjustme
 
 - Import shows row-level validation errors for missing required fields and duplicate student IDs.
 - Exchange form blocks inactive waste types and non-positive item counts.
+- Waste type creation reuses inactive records with the same name and returns form-level errors instead of crashing the page.
 - Review step recalculates on the server before confirmation so stale client values cannot grant wrong points.
 - Adjustment form requires a non-empty reason.
 - Corrections that change item-count outcomes must also update affected remainders through auditable remainder adjustments.
@@ -438,5 +441,5 @@ UI checks:
 - Read the relevant Next.js 16 docs before changing route, form, auth, or data-access code.
 - Prefer Server Components and Server Actions where they fit.
 - Keep authorization close to the Data Access Layer and inside mutations.
-- Use active/inactive flags for accounts and waste types instead of deleting records that affect history. Hard-delete students only when the account has no exchange, remainder, or adjustment records.
+- Use active/inactive flags for accounts and waste types instead of deleting records that affect history. Hard-delete students or waste types only when they have no exchange, remainder, or adjustment records.
 - Keep the MVP focused on point accumulation and reporting. Reward redemption can be a later project.

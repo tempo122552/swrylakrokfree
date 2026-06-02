@@ -1,17 +1,26 @@
 import { UserRole } from "@prisma/client";
-import { Plus, PowerOff } from "lucide-react";
+import { Plus, PowerOff, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/shell/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import { listWasteTypes } from "@/data/waste-types";
 import { requirePageRole } from "@/lib/auth/require-page-role";
 import { teacherNavItems } from "@/lib/navigation";
-import { createWasteTypeAction, deactivateWasteTypeAction } from "../actions";
+import {
+  createWasteTypeAction,
+  deactivateWasteTypeAction,
+  deleteWasteTypeAction,
+} from "../actions";
 
 export default async function WasteTypesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{
+    deleted?: string;
+    error?: string;
+    saved?: string;
+    updated?: string;
+  }>;
 }) {
   await requirePageRole([UserRole.TEACHER]);
   const [wasteTypes, params] = await Promise.all([listWasteTypes(), searchParams]);
@@ -22,9 +31,24 @@ export default async function WasteTypesPage({
       subtitle="กำหนดชนิดขยะและจำนวนชิ้นต่อหนึ่งแต้ม"
       navItems={teacherNavItems}
     >
-      {params.created ? (
+      {params.saved ? (
         <p className="mb-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800">
-          เพิ่มชนิดขยะแล้ว
+          บันทึกชนิดขยะแล้ว หากชื่อเดิมถูกปิดใช้งาน ระบบจะเปิดกลับมาใช้และอัปเดตอัตราแต้มให้
+        </p>
+      ) : null}
+      {params.updated ? (
+        <p className="mb-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800">
+          อัปเดตสถานะชนิดขยะแล้ว
+        </p>
+      ) : null}
+      {params.deleted ? (
+        <p className="mb-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800">
+          ลบชนิดขยะแล้ว
+        </p>
+      ) : null}
+      {params.error ? (
+        <p className="mb-4 rounded-lg bg-rose-50 px-4 py-3 text-sm font-bold text-rose-800">
+          {params.error}
         </p>
       ) : null}
       <form
@@ -59,17 +83,24 @@ export default async function WasteTypesPage({
             <Badge key={`${wasteType.id}-status`} tone={wasteType.isActive ? "emerald" : "slate"}>
               {wasteType.isActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}
             </Badge>,
-            wasteType.isActive ? (
-              <form action={deactivateWasteTypeAction} key={wasteType.id}>
+            <div className="flex flex-wrap gap-2" key={wasteType.id}>
+              {wasteType.isActive ? (
+                <form action={deactivateWasteTypeAction}>
+                  <input name="wasteTypeId" type="hidden" value={wasteType.id} />
+                  <button className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-bold">
+                    <PowerOff aria-hidden size={15} />
+                    ปิดใช้งาน
+                  </button>
+                </form>
+              ) : null}
+              <form action={deleteWasteTypeAction}>
                 <input name="wasteTypeId" type="hidden" value={wasteType.id} />
-                <button className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-bold">
-                  <PowerOff aria-hidden size={15} />
-                  ปิดใช้งาน
+                <button className="inline-flex items-center gap-2 rounded-md border border-rose-300 px-3 py-1.5 text-sm font-bold text-rose-700 hover:bg-rose-50">
+                  <Trash2 aria-hidden size={15} />
+                  ลบ
                 </button>
               </form>
-            ) : (
-              "-"
-            ),
+            </div>,
           ])}
         />
       </section>

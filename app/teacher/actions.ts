@@ -12,7 +12,11 @@ import {
   updateTeacherStudentProfile,
 } from "@/data/students";
 import { createAdultAccount } from "@/data/users";
-import { createWasteType, setWasteTypeActive } from "@/data/waste-types";
+import {
+  createWasteType,
+  deleteWasteType,
+  setWasteTypeActive,
+} from "@/data/waste-types";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
 type StudentPreviewRow = {
@@ -236,22 +240,67 @@ export async function deleteStudentProfileAction(
 }
 
 export async function createWasteTypeAction(formData: FormData) {
-  await createWasteType(await getCurrentUser(), {
-    name: String(formData.get("name") ?? ""),
-    itemsPerPoint: Number(formData.get("itemsPerPoint") ?? 0),
-  });
-  revalidatePath("/teacher/waste-types");
-  redirect("/teacher/waste-types?created=1");
+  let redirectTo = "/teacher/waste-types";
+
+  try {
+    await createWasteType(await getCurrentUser(), {
+      name: String(formData.get("name") ?? ""),
+      itemsPerPoint: Number(formData.get("itemsPerPoint") ?? 0),
+    });
+    revalidatePath("/teacher/waste-types");
+    redirectTo = "/teacher/waste-types?saved=1";
+  } catch (error) {
+    const params = new URLSearchParams({
+      error:
+        error instanceof Error ? error.message : "บันทึกชนิดขยะไม่สำเร็จ",
+    });
+    redirectTo = `/teacher/waste-types?${params.toString()}`;
+  }
+
+  redirect(redirectTo);
 }
 
 export async function deactivateWasteTypeAction(formData: FormData) {
-  await setWasteTypeActive(
-    await getCurrentUser(),
-    String(formData.get("wasteTypeId") ?? ""),
-    false,
-  );
-  revalidatePath("/teacher/waste-types");
-  redirect("/teacher/waste-types");
+  let redirectTo = "/teacher/waste-types";
+
+  try {
+    await setWasteTypeActive(
+      await getCurrentUser(),
+      String(formData.get("wasteTypeId") ?? ""),
+      false,
+    );
+    revalidatePath("/teacher/waste-types");
+    redirectTo = "/teacher/waste-types?updated=1";
+  } catch (error) {
+    const params = new URLSearchParams({
+      error:
+        error instanceof Error ? error.message : "ปิดใช้งานชนิดขยะไม่สำเร็จ",
+    });
+    redirectTo = `/teacher/waste-types?${params.toString()}`;
+  }
+
+  redirect(redirectTo);
+}
+
+export async function deleteWasteTypeAction(formData: FormData) {
+  let redirectTo = "/teacher/waste-types";
+
+  try {
+    await deleteWasteType(
+      await getCurrentUser(),
+      String(formData.get("wasteTypeId") ?? ""),
+    );
+    revalidatePath("/teacher/waste-types");
+    redirectTo = "/teacher/waste-types?deleted=1";
+  } catch (error) {
+    const params = new URLSearchParams({
+      error:
+        error instanceof Error ? error.message : "ลบชนิดขยะไม่สำเร็จ",
+    });
+    redirectTo = `/teacher/waste-types?${params.toString()}`;
+  }
+
+  redirect(redirectTo);
 }
 
 export async function createAdultAccountAction(
