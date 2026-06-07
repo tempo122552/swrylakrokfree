@@ -18,10 +18,13 @@ describe("buildStudentImportResultWorkbook", () => {
   it("builds an Excel sheet with student account columns", () => {
     const workbook = buildStudentImportResultWorkbook([
       {
-        studentId: "10001",
-        fullName: "นักเรียน ตัวอย่าง",
+        studentId: "06692",
+        fullName: "เด็กชาย กนกพล ต่างประเสริฐ",
         gradeLevel: "ม.1",
         classroom: "ม.1/1",
+        prefix: "เด็กชาย",
+        firstName: "กนกพล",
+        lastName: "ต่างประเสริฐ",
         initialPassword: "Password123!",
       },
     ]);
@@ -34,10 +37,12 @@ describe("buildStudentImportResultWorkbook", () => {
     expect(parsed.SheetNames).toEqual([studentImportResultSheetName]);
     expect(rows).toEqual([
       {
-        "เลขประจำตัวนักเรียน": "10001",
-        "ชื่อ-นามสกุล": "นักเรียน ตัวอย่าง",
-        "ระดับชั้น": "ม.1",
-        "ห้องเรียน": "ม.1/1",
+        "เลขประจำตัวนักเรียน": "06692",
+        คำนำหน้า: "เด็กชาย",
+        ชื่อ: "กนกพล",
+        นามสกุล: "ต่างประเสริฐ",
+        ชั้น: "ม.1",
+        ห้อง: "1",
         "รหัสผ่านเริ่มต้น": "Password123!",
       },
     ]);

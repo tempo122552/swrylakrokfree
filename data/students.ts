@@ -688,6 +688,9 @@ export async function importStudents(
         fullName: row.fullName,
         gradeLevel: row.gradeLevel,
         classroom: row.classroom,
+        prefix: row.prefix,
+        firstName: row.firstName,
+        lastName: row.lastName,
         initialPassword,
       });
     }

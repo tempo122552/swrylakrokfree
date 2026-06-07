@@ -4,6 +4,10 @@ import { Download, FileCheck2, Upload } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
 import { DataTable } from "@/components/ui/data-table";
+import {
+  formatStudentImportPreviewCells,
+  studentImportPreviewHeaders,
+} from "@/data/import-students";
 import { downloadStudentImportResultXlsx } from "@/lib/student-import-result-xlsx";
 import {
   confirmImportStudentsAction,
@@ -102,13 +106,10 @@ export function ImportStudentsForm() {
             </button>
           </div>
           <DataTable
-            headers={["เลขประจำตัว", "ชื่อ-นามสกุล", "ระดับชั้น", "ห้องเรียน"]}
-            rows={previewState.previewRows.map((student) => [
-              student.studentId,
-              student.fullName,
-              student.gradeLevel,
-              student.classroom,
-            ])}
+            headers={[...studentImportPreviewHeaders]}
+            rows={previewState.previewRows.map((student) =>
+              formatStudentImportPreviewCells(student),
+            )}
           />
         </form>
       ) : null}
