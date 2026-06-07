@@ -2,7 +2,10 @@ import "server-only";
 import { UserRole, type Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/data/db";
-import type { ImportedStudentRow } from "@/data/import-students";
+import type {
+  ImportedStudentAccount,
+  ImportedStudentRow,
+} from "@/data/import-students";
 import { requireRole, type CurrentUser } from "@/data/permissions";
 import {
   defaultStudentInitialPassword,
@@ -624,59 +627,71 @@ export async function findExistingStudentIds(studentIds: string[]) {
   return new Set(existing.map((student) => student.studentId));
 }
 
+export function formatExistingStudentIdsError(studentIds: string[]) {
+  const preview = studentIds.slice(0, 5).join(", ");
+  const suffix =
+    studentIds.length > 5 ? ` และอีก ${studentIds.length - 5} รายการ` : "";
+
+  return `พบเลขประจำตัวนักเรียนที่มีอยู่แล้ว ${studentIds.length} รายการ: ${preview}${suffix}`;
+}
+
 export async function importStudents(
   currentUser: CurrentUser | null,
   rows: ImportedStudentRow[],
 ) {
   requireRole(currentUser, [UserRole.TEACHER]);
 
-  const existing = await prisma.studentProfile.findMany({
-    where: { studentId: { in: rows.map((row) => row.studentId) } },
-    select: { studentId: true },
-  });
-
-  if (existing.length > 0) {
-    throw new Error(
-      `พบเลขประจำตัวนักเรียนที่มีอยู่แล้ว: ${existing
-        .map((row) => row.studentId)
-        .join(", ")}`,
-    );
+  if (rows.length === 0) {
+    throw new Error("ไม่มีข้อมูลสำหรับนำเข้า");
   }
 
-  const created: Array<{
-    studentId: string;
-    fullName: string;
-    initialPassword: string;
-  }> = [];
+  const initialPassword = defaultStudentInitialPassword;
+  const passwordHash = await hashPassword(initialPassword);
 
-  for (const row of rows) {
-    const initialPassword = defaultStudentInitialPassword;
-    const user = await prisma.user.create({
-      data: {
-        role: UserRole.STUDENT,
-        loginName: row.studentId,
-        displayName: row.fullName,
-        passwordHash: await hashPassword(initialPassword),
-        mustChangePassword: true,
-      },
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.studentProfile.findMany({
+      where: { studentId: { in: rows.map((row) => row.studentId) } },
+      select: { studentId: true },
     });
 
-    await prisma.studentProfile.create({
-      data: {
-        userId: user.id,
+    if (existing.length > 0) {
+      throw new Error(
+        formatExistingStudentIdsError(existing.map((row) => row.studentId)),
+      );
+    }
+
+    const created: ImportedStudentAccount[] = [];
+
+    for (const row of rows) {
+      const user = await tx.user.create({
+        data: {
+          role: UserRole.STUDENT,
+          loginName: row.studentId,
+          displayName: row.fullName,
+          passwordHash,
+          mustChangePassword: true,
+        },
+      });
+
+      await tx.studentProfile.create({
+        data: {
+          userId: user.id,
+          studentId: row.studentId,
+          fullName: row.fullName,
+          gradeLevel: row.gradeLevel,
+          classroom: row.classroom,
+        },
+      });
+
+      created.push({
         studentId: row.studentId,
         fullName: row.fullName,
         gradeLevel: row.gradeLevel,
         classroom: row.classroom,
-      },
-    });
+        initialPassword,
+      });
+    }
 
-    created.push({
-      studentId: row.studentId,
-      fullName: row.fullName,
-      initialPassword,
-    });
-  }
-
-  return created;
+    return created;
+  });
 }

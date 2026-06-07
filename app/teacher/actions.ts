@@ -4,7 +4,11 @@ import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAcademicTerm } from "@/data/academic-terms";
-import { parseStudentFile, parseStudentRows } from "@/data/import-students";
+import {
+  type ImportedStudentAccount,
+  parseImportPayload,
+  parseStudentFile,
+} from "@/data/import-students";
 import {
   deleteTeacherStudentProfile,
   findExistingStudentIds,
@@ -19,6 +23,7 @@ import {
   setWasteTypeActive,
 } from "@/data/waste-types";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { defaultStudentInitialPassword } from "@/lib/auth/passwords";
 
 type StudentPreviewRow = {
   studentId: string;
@@ -31,7 +36,7 @@ export type ImportStudentsState = {
   message: string;
   errors: Array<{ rowNumber: number; message: string }>;
   previewRows: StudentPreviewRow[];
-  created: Array<{ studentId: string; fullName: string; initialPassword: string }>;
+  created: ImportedStudentAccount[];
 };
 
 export type UpdateStudentProfileState = {
@@ -102,19 +107,22 @@ export async function confirmImportStudentsAction(
   _state: ImportStudentsState,
   formData: FormData,
 ): Promise<ImportStudentsState> {
-  const studentIds = formData.getAll("studentId").map(String);
-  const fullNames = formData.getAll("fullName").map(String);
-  const gradeLevels = formData.getAll("gradeLevel").map(String);
-  const classrooms = formData.getAll("classroom").map(String);
+  const importPayload = formData.get("importPayload");
 
-  const rows = studentIds.map((studentId, index) => ({
-    "เลขประจำตัวนักเรียน": studentId,
-    "ชื่อ-นามสกุล": fullNames[index] ?? "",
-    "ระดับชั้น": gradeLevels[index] ?? "",
-    "ห้องเรียน": classrooms[index] ?? "",
-  }));
-  const existingStudentIds = await findExistingStudentIds(studentIds);
-  const parsed = parseStudentRows(rows, { existingStudentIds });
+  if (typeof importPayload !== "string" || importPayload.length === 0) {
+    return {
+      message: "ไม่มีข้อมูลสำหรับนำเข้า",
+      errors: [],
+      previewRows: [],
+      created: [],
+    };
+  }
+
+  const payloadPreview = parseImportPayload(importPayload);
+  const existingStudentIds = await findExistingStudentIds(
+    payloadPreview.validRows.map((row) => row.studentId),
+  );
+  const parsed = parseImportPayload(importPayload, { existingStudentIds });
 
   if (parsed.validRows.length === 0) {
     return {
@@ -140,7 +148,7 @@ export async function confirmImportStudentsAction(
     const created = await importStudents(await getCurrentUser(), parsed.validRows);
     revalidatePath("/teacher/students");
     return {
-      message: `นำเข้า ${created.length} คนสำเร็จ`,
+      message: `นำเข้า ${created.length} คนสำเร็จ รหัสผ่านเริ่มต้นของทุกคนคือ ${defaultStudentInitialPassword}`,
       errors: [],
       previewRows: [],
       created,

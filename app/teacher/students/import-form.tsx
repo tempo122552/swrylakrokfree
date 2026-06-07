@@ -4,6 +4,7 @@ import { Download, FileCheck2, Upload } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
 import { DataTable } from "@/components/ui/data-table";
+import { downloadStudentImportResultXlsx } from "@/lib/student-import-result-xlsx";
 import {
   confirmImportStudentsAction,
   previewImportStudentsAction,
@@ -85,14 +86,11 @@ export function ImportStudentsForm() {
 
       {canConfirm ? (
         <form action={confirmAction} className="mt-4">
-          {previewState.previewRows.map((student) => (
-            <div key={student.studentId}>
-              <input name="studentId" type="hidden" value={student.studentId} />
-              <input name="fullName" type="hidden" value={student.fullName} />
-              <input name="gradeLevel" type="hidden" value={student.gradeLevel} />
-              <input name="classroom" type="hidden" value={student.classroom} />
-            </div>
-          ))}
+          <input
+            name="importPayload"
+            type="hidden"
+            value={JSON.stringify(previewState.previewRows)}
+          />
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-base font-black">ตัวอย่างข้อมูลที่จะนำเข้า</h3>
             <button
@@ -117,7 +115,17 @@ export function ImportStudentsForm() {
 
       {confirmState.created.length > 0 ? (
         <div className="mt-4">
-          <h3 className="mb-3 text-base font-black">บัญชีที่สร้างแล้ว</h3>
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-base font-black">บัญชีที่สร้างแล้ว</h3>
+            <button
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-200 px-3 py-2 text-sm font-black text-emerald-800 hover:bg-emerald-50"
+              onClick={() => downloadStudentImportResultXlsx(confirmState.created)}
+              type="button"
+            >
+              <Download aria-hidden size={16} />
+              ดาวน์โหลด Excel
+            </button>
+          </div>
           <DataTable
             headers={["เลขประจำตัว", "ชื่อ-นามสกุล", "รหัสผ่านเริ่มต้น"]}
             rows={confirmState.created.map((student) => [
